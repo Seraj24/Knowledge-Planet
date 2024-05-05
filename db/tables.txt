@@ -1,0 +1,27 @@
+CREATE TABLE IF NOT EXISTS player(
+    username VARCHAR(15) NOT NULL UNIQUE, 
+    firstName VARCHAR(20) NOT NULL, 
+    lastName VARCHAR(20) NOT NULL,
+    registrationTime DATETIME NOT NULL,
+    id VARCHAR(200) GENERATED ALWAYS AS (CONCAT(UPPER(LEFT(lastName,2)),UPPER(LEFT(firstName,2)),UPPER(LEFT(username,3)),CAST(registrationTime AS SIGNED))),
+    registrationOrder INTEGER AUTO_INCREMENT,
+    PRIMARY KEY (registrationOrder)
+); 
+
+CREATE TABLE IF NOT EXISTS authenticator(   
+    passCode VARCHAR(255) NOT NULL,
+    registrationOrder INTEGER, 
+    FOREIGN KEY (registrationOrder) REFERENCES player(registrationOrder)
+); 
+
+CREATE TABLE IF NOT EXISTS score( 
+    scoreTime DATETIME NOT NULL, 
+    result ENUM('win', 'gameover', 'incomplete'),
+    livesUsed INTEGER NOT NULL,
+    registrationOrder INTEGER, 
+    FOREIGN KEY (registrationOrder) REFERENCES player(registrationOrder)
+); 
+
+CREATE VIEW history AS SELECT p.registrationOrder, p.id, p.username, p.firstName, p.lastName, s.scoreTime, s.result, s.livesUsed 
+FROM player p 
+JOIN score s ON p.registrationOrder = s.registrationOrder;
